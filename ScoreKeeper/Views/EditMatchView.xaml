@@ -8,6 +8,9 @@
              mc:Ignorable="d" 
    
              d:DesignHeight="450" d:DesignWidth="600">
+    <UserControl.Resources>
+        <ResourceDictionary Source="/Resources/Icons.xaml"/>
+    </UserControl.Resources>
     <ScrollViewer HorizontalScrollBarVisibility="Auto">
         <Grid>
             <Grid.ColumnDefinitions>
@@ -65,7 +68,11 @@
             <!-- Competition Name and Category -->
 
             <!-- Starting 11 -->
-            <Label Margin="5" Grid.Row="0" Grid.Column="2">Starting Eleven</Label>
+            <Label Margin="5" Grid.Row="0" Grid.Column="2"
+                   FontSize="{DynamicResource DialogTitleFontSize}"
+                   FontFamily="{DynamicResource HeaderFontFamily}"
+                   Foreground="{DynamicResource AccentColorBrush}"
+                   >Starting Eleven</Label>
             <ItemsControl x:Name="StartingElevenControl"
                       Margin="5"
                       Grid.Row="1" Grid.Column="2" Grid.RowSpan="7" 
@@ -94,7 +101,10 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <!-- Goals -->
-            <Label Margin="5" Grid.Row="0" Grid.Column="3">Goals</Label>
+            <Label Margin="5" Grid.Row="0" Grid.Column="3"
+                   FontSize="{DynamicResource DialogTitleFontSize}"
+                   FontFamily="{DynamicResource HeaderFontFamily}"
+                   Foreground="{DynamicResource AccentColorBrush}">Goals</Label>
             <ListView Margin="5" Grid.Row="1" 
                   Grid.Column="3"
                   Grid.RowSpan="5"
@@ -111,12 +121,38 @@
                 </ListView.ItemTemplate>
             </ListView>
             <StackPanel Orientation="Horizontal" Grid.Column="3" Grid.Row="6">
-                <Button Margin="5" Command="{Binding AddGoal}">Add</Button>
-                <Button Margin="5" Command="{Binding RemoveGoal}" CommandParameter="{Binding SelectedGoal}">Remove</Button>
+                <Button Height="40" Width="40" Style="{DynamicResource MetroCircleButtonStyle}"
+                        Margin="5" Command="{Binding AddGoal}">
+                    <Rectangle Width="20"
+                               Height="20"
+                               Fill="{Binding Path=Foreground, 
+                                        RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill"
+                                         Visual="{DynamicResource appbar_add}"/>
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                </Button>
+                <Button Height="40" Width="40" Style="{DynamicResource MetroCircleButtonStyle}"
+                        Margin="5" Command="{Binding RemoveGoal}" CommandParameter="{Binding SelectedGoal}">
+                    <Rectangle Width="20"
+                               Height="20"
+                               Fill="{Binding Path=Foreground, 
+                                        RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill"
+                                         Visual="{DynamicResource appbar_delete}"/>
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                </Button>
             </StackPanel>
 
             <!-- Subs -->
-            <Label Margin="5" Grid.Row="7" Grid.Column="3">Subs</Label>
+            <Label Margin="5" Grid.Row="7" Grid.Column="3"
+                   FontSize="{DynamicResource DialogTitleFontSize}"
+                   FontFamily="{DynamicResource HeaderFontFamily}"
+                   Foreground="{DynamicResource AccentColorBrush}"
+                   >Subs</Label>
 
             <ListView Margin="5" Grid.Row="8" 
                   Grid.Column="3"
@@ -134,8 +170,12 @@
             </ListView>
 
             <StackPanel Orientation="Horizontal" Grid.Column="3" Grid.Row="11">
-                <Button Margin="5" Command="{Binding AddSub}">Add</Button>
-                <Button Margin="5" Command="{Binding RemoveSub}" CommandParameter="{Binding SelectedSubstitution}">Remove</Button>
+                <Button Margin="5" Command="{Binding AddSub}" FontFamily="/Resources/#Entypo"
+                        FontSize="36" Height="40" Width="40"
+                        Style="{DynamicResource MetroCircleButtonStyle}">]</Button>
+                <Button Margin="5" Command="{Binding RemoveSub}" CommandParameter="{Binding SelectedSubstitution}"
+                        FontFamily="/Resources/#Entypo" Height="40" Width="40"
+                        FontSize="36" Style="{DynamicResource MetroCircleButtonStyle}">u</Button>
             </StackPanel>
 
         </Grid>
