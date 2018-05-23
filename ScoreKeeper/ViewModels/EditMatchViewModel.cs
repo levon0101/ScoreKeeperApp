@@ -9,6 +9,7 @@ namespace ScoreKeeper.ViewModels
 {
     class EditMatchViewModel : ViewModelBase
     {
+        public ObservableCollection<string> AllPlayers { get; private set; }
         private readonly Match match;
         private readonly ScoreViewModel halfTimeScore;
         private readonly ScoreViewModel fullTimeScore;
@@ -18,8 +19,9 @@ namespace ScoreKeeper.ViewModels
         private Goal selectedGoal;
         private Substitution selectedSubstitution;
 
-        public EditMatchViewModel(Match match)
+        public EditMatchViewModel(Match match, ObservableCollection<string> allPlayers)
         {
+            AllPlayers = allPlayers;
             this.match = match;
             VenueTypes = new[]
             {
@@ -47,7 +49,7 @@ namespace ScoreKeeper.ViewModels
 
             Goals = new ObservableCollection<Goal>(match.Goals);
             AddGoal = new RelayCommand(OnAddGoal);
-            RemoveGoal =  new RelayCommand(OnRemoveGoal, o => o != null);
+            RemoveGoal = new RelayCommand(OnRemoveGoal, o => o != null);
 
             Substitutions = new ObservableCollection<Substitution>(match.Substitutions);
             AddSub = new RelayCommand(OnAddSub);
@@ -90,17 +92,21 @@ namespace ScoreKeeper.ViewModels
         {
             var w = new Window();
             w.Width = 400;
-            w.Height = 250;
+            w.Height = 260;
             w.Title = "Add new goal";
+            w.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             w.Content = new GoalView();
             var vm = new GoalViewModel();
             w.DataContext = vm;
+            w.Owner = Application.Current.MainWindow;
             if (w.ShowDialog().GetValueOrDefault())
             {
-                Goals.Add(new Goal() { 
-                    GoalType = vm.GoalType, 
-                    Minute = vm.Minute, 
-                    Scorer = vm.Scorer});
+                Goals.Add(new Goal()
+                {
+                    GoalType = vm.GoalType,
+                    Minute = vm.Minute,
+                    Scorer = vm.Scorer
+                });
             }
         }
 
@@ -111,8 +117,10 @@ namespace ScoreKeeper.ViewModels
             w.Height = 250;
             w.Title = "Add new substitution";
             w.Content = new SubstitutionView();
+            w.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             var vm = new SubstitutionViewModel();
             w.DataContext = vm;
+            w.Owner = Application.Current.MainWindow;
             if (w.ShowDialog().GetValueOrDefault())
             {
                 Substitutions.Add(new Substitution()
@@ -127,7 +135,7 @@ namespace ScoreKeeper.ViewModels
 
         private static Score GetMatchScore(Match match, ScoreType scoreType)
         {
-            return match.Scores.FirstOrDefault(s => s.ScoreType == scoreType) ?? new Score() { ScoreType = scoreType, NotApplicable = true};
+            return match.Scores.FirstOrDefault(s => s.ScoreType == scoreType) ?? new Score() { ScoreType = scoreType, NotApplicable = true };
         }
 
         public StartingPlayerViewModel[] StartingEleven { get; private set; }
@@ -245,7 +253,7 @@ namespace ScoreKeeper.ViewModels
         public ObservableCollection<Substitution> Substitutions { get; private set; }
 
         public RelayCommand AddGoal { get; private set; }
-        public RelayCommand RemoveGoal { get; private set;  }
+        public RelayCommand RemoveGoal { get; private set; }
 
         public RelayCommand AddSub { get; private set; }
         public RelayCommand RemoveSub { get; private set; }

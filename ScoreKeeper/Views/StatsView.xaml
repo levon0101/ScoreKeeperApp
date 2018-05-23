@@ -6,33 +6,33 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="500">
     <Grid>
-          <Grid.ColumnDefinitions>
-              <ColumnDefinition></ColumnDefinition>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition></ColumnDefinition>
             <ColumnDefinition></ColumnDefinition>
             <ColumnDefinition Width="2*"></ColumnDefinition>
-            
-        </Grid.ColumnDefinitions>  
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition></RowDefinition>
-        </Grid.RowDefinitions>
-        <Label>Appearances:</Label>
-        <ListView Grid.Row="1" ItemsSource="{Binding Appearances}"></ListView>
-        <Label Grid.Column="1">Goalscorers:</Label>
-        <ListView Grid.Column="1" Grid.Row="1" ItemsSource="{Binding Goalscorers}"></ListView>
-        <Label Grid.Column="2">Results:</Label>
-        <ListView Grid.Column="2" Grid.Row="1" ItemsSource="{Binding Results}">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn DisplayMemberBinding="{Binding Label}" Header="Competition" Width="100"/>
-                    <GridViewColumn DisplayMemberBinding="{Binding Played}" Header="P" Width="25"/>
-                    <GridViewColumn DisplayMemberBinding="{Binding Won}" Header="W" Width="25"/>
-                    <GridViewColumn DisplayMemberBinding="{Binding Drawn}" Header="D" Width="25"/>
-                    <GridViewColumn DisplayMemberBinding="{Binding Lost}" Header="L" Width="25"/>
-                    <GridViewColumn DisplayMemberBinding="{Binding For}" Header="F" Width="25"/>
-                    <GridViewColumn DisplayMemberBinding="{Binding Against}" Header="A" Width="25"/>
-                </GridView>
-            </ListView.View>
-        </ListView>
+        </Grid.ColumnDefinitions>
+
+        <GroupBox Header="Appearances:" Margin="3 0">
+            <ListView Grid.Row="1" ItemsSource="{Binding Appearances}" BorderThickness="0"
+                  ></ListView>
+        </GroupBox>
+        <Expander Grid.Column="1" Header="Goalscorers:" Margin="3 0">
+            <ListView Grid.Column="1"  ItemsSource="{Binding Goalscorers}" BorderThickness="0"></ListView>
+        </Expander>
+        <GroupBox Header="Results" Grid.Column="2" Margin="3 0">
+            <ListView Grid.Column="2" Grid.Row="1" ItemsSource="{Binding Results}" BorderThickness="0">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn DisplayMemberBinding="{Binding Label}" Header="Competition" Width="100"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding Played}" Header="P" Width="25"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding Won}" Header="W" Width="25"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding Drawn}" Header="D" Width="25"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding Lost}" Header="L" Width="25"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding For}" Header="F" Width="25"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding Against}" Header="A" Width="25"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </GroupBox>
     </Grid>
 </UserControl>

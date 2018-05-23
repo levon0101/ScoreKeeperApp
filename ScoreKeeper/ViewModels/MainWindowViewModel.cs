@@ -1,74 +1,139 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using ScoreKeeper.Model;
+using ScoreKeeper.ViewModels.Services;
 using ScoreKeeper.Views;
 
 namespace ScoreKeeper.ViewModels
 {
     class MainWindowViewModel : ViewModelBase
     {
-        private readonly Action<UserControl> navigateToView;
-        private MatchesView matchesView;
-        private StatsView statsView;
+        private EditMatchViewModel editMatchViewModel;
+        private int selectedTabIndex;
+        private IDialogService dialogService;
+
+        public ObservableCollection<string> AllPlayers { get; private set; }
         public RelayCommand NewMatch { get; private set; }
-        public RelayCommand ViewMatches { get; private set; }
-        public RelayCommand ViewStats { get; private set; }
         public RelayCommand Exit { get; private set; }
         public RelayCommand Publish { get; private set; }
         public RelayCommand Settings { get; private set; }
 
-        public MainWindowViewModel(Action<UserControl> navigateToView)
+        public StatsViewModel StatsViewModel { get; set; }
+        public MatchesViewModel MatchesViewModel { get; set; }
+        public SettingsViewModel SettingsViewModel { get; set; }
+
+        public EditMatchViewModel EditMatchViewModel
         {
-            this.navigateToView = navigateToView;
+            get { return editMatchViewModel; }
+            set
+            {
+                if (Equals(value, editMatchViewModel)) return;
+                editMatchViewModel = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool isSettingsFlyoutOpen;
+
+        public bool IsSettingsFlyoutOpen
+        {
+            get { return isSettingsFlyoutOpen; }
+            set
+            {
+                if (!value.Equals(isSettingsFlyoutOpen))
+                {
+                    isSettingsFlyoutOpen = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public int SelectedTabIndex
+        {
+            get { return selectedTabIndex; }
+            set
+            {
+                if (value == selectedTabIndex) return;
+                selectedTabIndex = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public MainWindowViewModel(IDialogService dialogService)
+        {
+            this.dialogService = dialogService;
             Initializate();
             NewMatch = new RelayCommand(_ => EditMatch(null));
-            ViewMatches = new RelayCommand(_ => navigateToView(matchesView));
-            ViewStats = new RelayCommand(_ => navigateToView(statsView));
             Exit = new RelayCommand(_ => Application.Current.MainWindow.Close());
             Publish = new RelayCommand(_ => OnPublishCommand());
             Settings = new RelayCommand(_ => OnSettingsCommand());
-
         }
 
         private void OnSettingsCommand()
         {
-            var w = new Window();
-            w.Title = "Settings";
-            w.Content = new SettingsView();
-            w.SizeToContent = SizeToContent.WidthAndHeight;
-            var vm = new SettingsViewModel(() => w.Close());
-            w.DataContext = vm;
-            w.Owner = Application.Current.MainWindow;
-            w.ShowDialog();
+            IsSettingsFlyoutOpen = true;
+            //var w = new Window();
+            //w.Title = "Settings";
+            //w.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            //w.Content = new SettingsView();
+            //w.SizeToContent = SizeToContent.WidthAndHeight;
+            //var vm = new SettingsViewModel(() => w.Close());
+            //w.DataContext = vm;
+            //w.Owner = Application.Current.MainWindow;
+            //w.ShowDialog();
         }
 
-        private void OnPublishCommand()
+        private async void OnPublishCommand()
         {
-            var w = new Window();
-            w.Width = 400;
-            w.Height = 150;
-            w.Title = "Publishing";
-            w.Content = new PublishView();
-            var vm = new PublishViewModel(() => w.Close());
-            w.DataContext = vm;
-            w.Owner = Application.Current.MainWindow;
-            w.ShowDialog();
+            var controller = await dialogService.ShowProgressAsync("OnPublishing", "please wait");
+
+            controller.SetCancelable(true);
+            int uploadCount = 0;
+            foreach (var m in MatchesViewModel.Matches)
+            {
+                await UploadMatch(m);
+                if (controller.IsCanceled)
+                    break;
+                uploadCount++;
+                controller.SetProgress((double)uploadCount / MatchesViewModel.Matches.Count);
+            }
+            await controller.CloseAsync();
+            if (controller.IsCanceled)
+            {
+                await dialogService.ShowMessageDialog("Publishing", "Publishing was canceled");
+            }
+            else
+            {
+                await dialogService.ShowMessageDialog("Publishing", "Publishing was published normaly");
+            }
+            //var w = new Window();
+            //w.Width = 400;
+            //w.Height = 150;
+            //w.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            //w.Title = "Publishing";
+            //w.Content = new PublishView();
+            //var vm = new PublishViewModel(() => w.Close());
+            //w.DataContext = vm;
+            //w.Owner = Application.Current.MainWindow;
+            //w.ShowDialog();
+        }
+
+        private Task UploadMatch(MatchViewModel m)
+        {
+            return Task.Delay(250);
         }
 
         private void Initializate()
         {
             var matchesJson = File.ReadAllText("Matches.json");
-            var matches = JsonConvert.DeserializeObject<List<Match>>(matchesJson, 
+            var matches = JsonConvert.DeserializeObject<List<Match>>(matchesJson,
                 new StringEnumConverter());
             //var s = JsonConvert.SerializeObject(matches, Formatting.Indented, new StringEnumConverter());
             //var appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -76,28 +141,25 @@ namespace ScoreKeeper.ViewModels
             //Directory.CreateDirectory(p);
             //var f = Path.Combine(p, "matches.json");        
             //File.WriteAllText(f, s);
-            matchesView = new MatchesView();
             var matchViewModels = new ObservableCollection<MatchViewModel>(matches.Select(m => new MatchViewModel(m)));
 
-            matchesView.DataContext = new MatchesViewModel(matchViewModels,
+            AllPlayers = new ObservableCollection<string>(matches.SelectMany(m => m.StartingEleven));
+
+            MatchesViewModel = new MatchesViewModel(matchViewModels,
                 new RelayCommand(_ => EditMatch(null)),
                 new RelayCommand(m => EditMatch(((MatchViewModel)m).Match),
-                    o => o != null));
+                    o => o != null),
+                dialogService);
 
-            statsView = new StatsView();
-            var statsViewModel = new StatsViewModel(matchViewModels);
-            statsView.DataContext = statsViewModel;
+            StatsViewModel = new StatsViewModel(matchViewModels);
+            SettingsViewModel = new SettingsViewModel(() => IsSettingsFlyoutOpen = false);
 
-            navigateToView(matchesView);
         }
 
         private void EditMatch(Match m)
         {
-            var editMatchView = new EditMatchView();
-            editMatchView.DataContext = new EditMatchViewModel(m ?? Match.CreateNew());
-            navigateToView(editMatchView);
+            EditMatchViewModel = new EditMatchViewModel(m ?? Match.CreateNew(), AllPlayers);
+            SelectedTabIndex = 2;
         }
-
-
     }
 }

@@ -79,6 +79,8 @@
     <Compile Include="ViewModels\PublishViewModel.cs" />
     <Compile Include="ViewModels\RelayCommand.cs" />
     <Compile Include="ViewModels\ScoreViewModel.cs" />
+    <Compile Include="ViewModels\Services\DialogService.cs" />
+    <Compile Include="ViewModels\Services\IDialogService.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\StartingPlayerViewModel.cs" />
     <Compile Include="ViewModels\StatsViewModel.cs" />

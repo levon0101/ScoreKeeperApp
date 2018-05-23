@@ -17,6 +17,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using ScoreKeeper.Model;
 using ScoreKeeper.ViewModels;
+using ScoreKeeper.ViewModels.Services;
 using ScoreKeeper.Views;
 
 namespace ScoreKeeper
@@ -34,13 +35,13 @@ namespace ScoreKeeper
 
         private void OnLoaded(object sender, RoutedEventArgs routedEventArgs)
         {
-            this.DataContext = new MainWindowViewModel(NavigateToView);
+            this.DataContext = new MainWindowViewModel(new DialogService(this));
         }
 
-        private void NavigateToView(UserControl view)
-        {
-            MainArea.Content = view;
-        }
+        //private void NavigateToView(UserControl view)
+        //{
+        //    MainArea.Content = view;
+        //}
         
     }
 }
